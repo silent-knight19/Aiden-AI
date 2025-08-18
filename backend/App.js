@@ -13,6 +13,6 @@ app.get('/', (req,res)=>{
     res.send('hello world');
 });
 
-app.use('/api/user', userRoutes);
+app.use('/user', userRoutes);
 connect();
 export default app;
