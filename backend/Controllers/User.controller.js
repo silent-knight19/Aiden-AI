@@ -102,3 +102,6 @@ export const loginUserController = async (req, res) => {
         });
     }
 };
+
+export const profilecontroller = async (req, res) => {
+    
