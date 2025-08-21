@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock, KeyRound, UserRoundPlus } from 'lucide-react';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
 
-function App() {
+function Login() {
   const [isLogin, setIsLogin] = useState(true);
 
   // Animation variants
@@ -15,19 +15,23 @@ function App() {
         duration: 0.3,
         ease: "easeOut",
         when: "beforeChildren",
-        staggerChildren: 0.075
-      }
+        staggerChildren: 0.075,
+      },
     },
     exit: {
       opacity: 0,
       y: -20,
-      transition: { duration: 0.2, ease: "easeIn" }
-    }
+      transition: { duration: 0.2, ease: "easeIn" },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.2, ease: "easeOut" } }
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.2, ease: "easeOut" },
+    },
   };
 
   const toggleView = () => {
@@ -35,9 +39,11 @@ function App() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-screen 
+    <div
+      className="flex items-center justify-center min-h-screen w-screen 
                     bg-gradient-to-br from-gray-900 via-gray-950 to-black 
-                    text-gray-100 p-6 font-sans">
+                    text-gray-100 p-6 font-sans"
+    >
       <motion.div
         key={isLogin ? "login" : "signup"}
         variants={containerVariants}
@@ -52,7 +58,12 @@ function App() {
           <motion.div
             initial={{ scale: 0, rotate: 180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20, duration: 0.3 }}
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 20,
+              duration: 0.3,
+            }}
           >
             {isLogin ? (
               <KeyRound size={50} className="text-blue-500" />
@@ -61,7 +72,7 @@ function App() {
             )}
           </motion.div>
           <h1 className="text-5xl font-bold text-center text-white">
-            {isLogin ? 'Login' : 'Sign Up'}
+            {isLogin ? "Login" : "Sign Up"}
           </h1>
         </div>
 
@@ -69,7 +80,10 @@ function App() {
         {isLogin ? (
           <motion.form variants={containerVariants} className="space-y-8">
             <motion.div variants={itemVariants} className="relative">
-              <Mail className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500" size={24} />
+              <Mail
+                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
+                size={24}
+              />
               <input
                 type="email"
                 placeholder="Email"
@@ -80,7 +94,10 @@ function App() {
               />
             </motion.div>
             <motion.div variants={itemVariants} className="relative">
-              <Lock className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500" size={24} />
+              <Lock
+                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
+                size={24}
+              />
               <input
                 type="password"
                 placeholder="Password"
@@ -105,7 +122,10 @@ function App() {
         ) : (
           <motion.form variants={containerVariants} className="space-y-8">
             <motion.div variants={itemVariants} className="relative">
-              <Mail className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500" size={24} />
+              <Mail
+                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
+                size={24}
+              />
               <input
                 type="email"
                 placeholder="Email"
@@ -116,7 +136,10 @@ function App() {
               />
             </motion.div>
             <motion.div variants={itemVariants} className="relative">
-              <Lock className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500" size={24} />
+              <Lock
+                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
+                size={24}
+              />
               <input
                 type="password"
                 placeholder="Password"
@@ -159,4 +182,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;

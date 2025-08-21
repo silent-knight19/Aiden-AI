@@ -1,17 +1,17 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "../Pages/Login.jsx";
+import Login from "../Pages/Login";
+import Signup from "../Pages/Signup";
 
-
-export default function App() {
+function App() {
   return (
     <Router>
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-        <Routes>
-          <Route path="/" element={<Login />} />
-          {/* Remove or comment out the Signup route until the component is created */}
-          {/* <Route path="/signup" element={<Signup />} /> */}
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
     </Router>
   );
 }
+
+export default App;
