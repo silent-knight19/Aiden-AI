@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
+import axios from "..//config/axios";
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true);
-
+const
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95 },
