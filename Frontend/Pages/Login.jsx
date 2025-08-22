@@ -1,11 +1,27 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
-import axios from "..//config/axios";
-
+import axios from "../src/config/axios.js";
+import { useNavigate } from "react-router-dom";
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    axios
+      .post("/login", { email, password })
+      .then((res) => {
+        console.log(res.data);
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
   const [isLogin, setIsLogin] = useState(true);
-const
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95 },
@@ -79,13 +95,15 @@ const
 
         {/* Forms */}
         {isLogin ? (
-          <motion.form variants={containerVariants} className="space-y-8">
+          <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-8">
             <motion.div variants={itemVariants} className="relative">
               <Mail
                 className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
                 size={24}
               />
               <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="Email"
                 className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
@@ -100,6 +118,8 @@ const
                 size={24}
               />
               <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 placeholder="Password"
                 className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
@@ -121,7 +141,7 @@ const
             </motion.button>
           </motion.form>
         ) : (
-          <motion.form variants={containerVariants} className="space-y-8">
+          <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-8">
             <motion.div variants={itemVariants} className="relative">
               <Mail
                 className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
