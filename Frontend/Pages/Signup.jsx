@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound } from "lucide-react";
-import { useState } from "react";
-import axios from "../src/config/axios.js";
+import axiosInstance from "../src/config/axios.js";
 import { useNavigate } from "react-router-dom";
 
 const containerVariants = {
@@ -36,31 +35,39 @@ const itemVariants = {
 function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/signup", { email, password });
+      // Use the corrected endpoint for registration
+      const response = await axiosInstance.post("/user/register", { email, password });
       console.log("Signup successful:", response.data);
+      // Advise user and redirect to login page after successful signup
+      alert("Signup successful! Please proceed to login.");
       navigate("/login");
     } catch (error) {
-      console.error("Signup error:", error.response?.data || error.message);
-      // You might want to show an error message to the user here
+      // Provide detailed error feedback
+      if (error.response) {
+        console.error("Signup Error:", error.response.data);
+        alert(`Signup failed: ${JSON.stringify(error.response.data.errors || error.response.data)}`);
+      } else {
+        console.error("Network or other error:", error.message);
+        alert(`An error occurred: ${error.message}`);
+      }
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-screen 
-                     bg-gradient-to-br from-gray-900 via-gray-950 to-black 
+    <div className="flex items-center justify-center min-h-screen w-screen
+                     bg-gradient-to-br from-gray-900 via-gray-950 to-black
                      text-gray-100 p-6 font-sans">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="w-full max-w-lg bg-gray-900/90 backdrop-blur-xl 
+        className="w-full max-w-lg bg-gray-900/90 backdrop-blur-xl
                    rounded-3xl shadow-2xl p-10 border border-gray-800"
       >
         {/* Header */}
@@ -69,10 +76,10 @@ function Signup() {
           <h1 className="text-5xl font-bold text-center text-white">Sign Up</h1>
         </div>
 
-        {/* Login Form */}
-        <motion.form 
+        {/* Signup Form */}
+        <motion.form
           onSubmit={handleSubmit}
-          variants={containerVariants} 
+          variants={containerVariants}
           className="space-y-8"
         >
           <motion.div variants={itemVariants} className="relative">
@@ -82,9 +89,9 @@ function Signup() {
              onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="Email"
-              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
-                         text-lg text-white placeholder-gray-400 
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 
+              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl
+                         text-lg text-white placeholder-gray-400
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
                          transition duration-150"
             />
           </motion.div>
@@ -96,9 +103,9 @@ function Signup() {
              onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="Password"
-              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
-                         text-lg text-white placeholder-gray-400 
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 
+              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl
+                         text-lg text-white placeholder-gray-400
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
                          transition duration-150"
             />
           </motion.div>
@@ -108,8 +115,8 @@ function Signup() {
             whileTap={{ scale: 0.98 }}
             variants={itemVariants}
             type="submit"
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 
-                       text-lg text-white font-semibold rounded-xl 
+            className="w-full py-4 bg-blue-600 hover:bg-blue-700
+                       text-lg text-white font-semibold rounded-xl
                        transition duration-150 shadow-lg"
           >
             Sign Up

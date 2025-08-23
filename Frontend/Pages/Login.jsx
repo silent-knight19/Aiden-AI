@@ -1,27 +1,47 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
-import axios from "../src/config/axios.js";
+import axiosInstance from "../src/config/axios.js";
 import { useNavigate } from "react-router-dom";
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
-    axios
-      .post("/login", { email, password })
+    // Determine the correct endpoint based on the form mode (Login vs. Sign Up)
+    const endpoint = isLogin ? "/user/login" : "/user/register";
+
+    axiosInstance
+      .post(endpoint, { email, password })
       .then((res) => {
-        console.log(res.data);
-        navigate("/");
+        console.log("Success:", res.data);
+        if (isLogin) {
+          // On successful login, navigate to the home page
+          navigate("/");
+        } else {
+          // On successful signup, automatically switch to the login view
+          // so the user can sign in.
+          alert("Signup successful! Please log in.");
+          setIsLogin(true);
+        }
       })
       .catch((err) => {
-        console.log(err);
+        // Log the specific error data from the server for better debugging
+        if (err.response) {
+          console.error("Validation Error:", err.response.data);
+          // You can display this error to the user
+          alert(`Error: ${JSON.stringify(err.response.data.errors || err.response.data)}`);
+        } else {
+          console.error("Axios Error:", err.message);
+          alert(`An error occurred: ${err.message}`);
+        }
       });
   }
-  const [isLogin, setIsLogin] = useState(true);
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95 },
@@ -57,8 +77,8 @@ function Login() {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen w-screen 
-                    bg-gradient-to-br from-gray-900 via-gray-950 to-black 
+      className="flex items-center justify-center min-h-screen w-screen
+                    bg-gradient-to-br from-gray-900 via-gray-950 to-black
                     text-gray-100 p-6 font-sans"
     >
       <motion.div
@@ -67,7 +87,7 @@ function Login() {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="w-full max-w-lg bg-gray-900/90 backdrop-blur-xl 
+        className="w-full max-w-lg bg-gray-900/90 backdrop-blur-xl
                    rounded-3xl shadow-2xl p-10 border border-gray-800"
       >
         {/* Header with Icon */}
@@ -93,96 +113,52 @@ function Login() {
           </h1>
         </div>
 
-        {/* Forms */}
-        {isLogin ? (
-          <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-8">
-            <motion.div variants={itemVariants} className="relative">
-              <Mail
-                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
-                size={24}
-              />
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                placeholder="Email"
-                className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
-                           text-lg text-white placeholder-gray-400 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           transition duration-150"
-              />
-            </motion.div>
-            <motion.div variants={itemVariants} className="relative">
-              <Lock
-                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
-                size={24}
-              />
-              <input
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                placeholder="Password"
-                className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
-                           text-lg text-white placeholder-gray-400 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           transition duration-150"
-              />
-            </motion.div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              variants={itemVariants}
-              type="submit"
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 
-                         text-lg text-white font-semibold rounded-xl 
-                         transition duration-150 shadow-lg"
-            >
-              Sign In
-            </motion.button>
-          </motion.form>
-        ) : (
-          <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-8">
-            <motion.div variants={itemVariants} className="relative">
-              <Mail
-                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
-                size={24}
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
-                           text-lg text-white placeholder-gray-400 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           transition duration-150"
-              />
-            </motion.div>
-            <motion.div variants={itemVariants} className="relative">
-              <Lock
-                className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
-                size={24}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl 
-                           text-lg text-white placeholder-gray-400 
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 
-                           transition duration-150"
-              />
-            </motion.div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              variants={itemVariants}
-              type="submit"
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 
-                         text-lg text-white font-semibold rounded-xl 
-                         transition duration-150 shadow-lg"
-            >
-              Create Account
-            </motion.button>
-          </motion.form>
-        )}
+        {/* Unified Form */}
+        <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-8">
+          <motion.div variants={itemVariants} className="relative">
+            <Mail
+              className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
+              size={24}
+            />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="Email"
+              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl
+                         text-lg text-white placeholder-gray-400
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
+                         transition duration-150"
+            />
+          </motion.div>
+          <motion.div variants={itemVariants} className="relative">
+            <Lock
+              className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
+              size={24}
+            />
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="Password"
+              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl
+                         text-lg text-white placeholder-gray-400
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
+                         transition duration-150"
+            />
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            variants={itemVariants}
+            type="submit"
+            className="w-full py-4 bg-blue-600 hover:bg-blue-700
+                       text-lg text-white font-semibold rounded-xl
+                       transition duration-150 shadow-lg"
+          >
+            {isLogin ? "Sign In" : "Create Account"}
+          </motion.button>
+        </motion.form>
 
         {/* Toggle Button */}
         <div className="mt-8 text-center text-base">

@@ -13,7 +13,7 @@ export const createUserController = async (req, res) => {
     });
   }
 
-  const { email, password } = req.body; 
+  const { email, password } = req.body;
 
   try {
     // Check if user already exists
@@ -64,12 +64,12 @@ export const loginUserController = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find user by email
-    const user = await User.findOne({ email });
+    // Find user by email and explicitly select the password field
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: "Invalid email",
+        error: "Invalid email or password", // More generic for security
       });
     }
 
@@ -78,7 +78,7 @@ export const loginUserController = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        error: "Invalid password",
+        error: "Invalid email or password", // More generic for security
       });
     }
 
@@ -117,7 +117,7 @@ export const profilecontroller = async (req, res) => {
 export const logoutUserController = async (req, res) => {
     try {
         const token = req.cookies.token || req.headers.authorization.split(" ")[1];
-       
+
       redisClient.set(token, "logout", "EX", 60 * 60 * 24);
       res.clearCookie("token");
       res.json({
