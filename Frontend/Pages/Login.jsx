@@ -3,47 +3,45 @@ import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
 import axiosInstance from "../src/config/axios.js";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../src/context/user.context.jsx";
+import { useUser } from "../src/context/user.context.jsx";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-  const { setUser } = useContext(UserContext);
+  const { login } = useUser();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    // Determine the correct endpoint based on the form mode (Login vs. Sign Up)
-    const endpoint = isLogin ? "/user/login" : "/user/register";
-
-    axiosInstance
-      .post(endpoint, { email, password })
-      .then((res) => {
-        console.log("Success:", res.data);
-         localStorage.setItem("token", res.data.token);
-        setUser(res.data.user);
-        if (isLogin) {
-          // On successful login, navigate to the home page
+    
+    try {
+      if (isLogin) {
+        // Use the login function from context
+        const result = await login(email, password);
+        if (result.success) {
           navigate("/");
         } else {
-          // On successful signup, automatically switch to the login view
-          // so the user can sign in.
-          alert("Signup successful! Please log in.");
-          setIsLogin(true);
+          alert(result.error || "Login failed");
         }
-      })
-      .catch((err) => {
-        // Log the specific error data from the server for better debugging
-        if (err.response) {
-          console.error("Validation Error:", err.response.data);
-          // You can display this error to the user
-          alert(`Error: ${JSON.stringify(err.response.data.errors || err.response.data)}`);
-        } else {
-          console.error("Axios Error:", err.message);
-          alert(`An error occurred: ${err.message}`);
-        }
-      });
+      } else {
+        // Handle signup
+        const response = await axiosInstance.post("/user/register", { email, password });
+        console.log("Signup success:", response.data);
+        alert("Signup successful! Please log in.");
+        setIsLogin(true);
+      }
+    } catch (err) {
+      // Log the specific error data from the server for better debugging
+      if (err.response) {
+        console.error("Validation Error:", err.response.data);
+        // You can display this error to the user
+        alert(`Error: ${JSON.stringify(err.response.data.errors || err.response.data)}`);
+      } else {
+        console.error("Axios Error:", err.message);
+        alert(`An error occurred: ${err.message}`);
+      }
+    }
   }
 
   // Animation variants
