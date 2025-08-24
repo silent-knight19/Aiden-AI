@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
 import axiosInstance from "../src/config/axios.js";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../src/context/user.context.jsx";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -19,6 +21,8 @@ function Login() {
       .post(endpoint, { email, password })
       .then((res) => {
         console.log("Success:", res.data);
+         localStorage.setItem("token", res.data.token);
+        setUser(res.data.user);
         if (isLogin) {
           // On successful login, navigate to the home page
           navigate("/");
