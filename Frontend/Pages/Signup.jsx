@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound } from "lucide-react";
 import axiosInstance from "../src/config/axios.js";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { UserContext } from "../src/context/user.context";
 
 const containerVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -39,22 +41,51 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const toastId = toast.loading('Creating your account...');
+    
+    // Basic validation
+    if (!email || !password) {
+      toast.error('Please fill in all fields', { id: toastId });
+      return;
+    }
+
     try {
-      // Use the corrected endpoint for registration
       const response = await axiosInstance.post("/user/register", { email, password });
-      console.log("Signup successful:", response.data);
-      // Advise user and redirect to login page after successful signup
-      alert("Signup successful! Please proceed to login.");
-      navigate("/login");
+      
+      localStorage.setItem("token", response.data.token);
+      const { setUser } = useContext(UserContext);
+      setUser(response.data.user);
+      
+      toast.success('Account created successfully! Redirecting to login...', { id: toastId });
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+      
     } catch (error) {
-      // Provide detailed error feedback
+      let errorMessage = 'An unexpected error occurred';
+      
       if (error.response) {
-        console.error("Signup Error:", error.response.data);
-        alert(`Signup failed: ${JSON.stringify(error.response.data.errors || error.response.data)}`);
-      } else {
-        console.error("Network or other error:", error.message);
-        alert(`An error occurred: ${error.message}`);
+        // Handle server validation errors
+        if (error.response.data?.errors) {
+          errorMessage = Object.values(error.response.data.errors).join('\n');
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        } else {
+          errorMessage = error.response.data || 'Registration failed';
+        }
+      } else if (error.request) {
+        errorMessage = 'No response from server. Please check your connection.';
       }
+      
+      toast.error(errorMessage, { 
+        id: toastId,
+        duration: 5000,
+        style: {
+          maxWidth: '500px',
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-line'
+        }
+      });
     }
   };
 

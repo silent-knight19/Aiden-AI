@@ -1,9 +1,10 @@
-import React, { useState,useContext } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, KeyRound, UserRoundPlus } from "lucide-react";
 import axiosInstance from "../src/config/axios.js";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../src/context/user.context.jsx";
+import toast from "react-hot-toast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -14,33 +15,62 @@ function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    const toastId = toast.loading(isLogin ? 'Logging in...' : 'Creating account...');
+    
+    // Basic validation
+    if (!email || !password) {
+      toast.error('Please fill in all fields', { id: toastId });
+      return;
+    }
     
     try {
       if (isLogin) {
         // Use the login function from context
         const result = await login(email, password);
         if (result.success) {
+          toast.success('Login successful!', { id: toastId });
           navigate("/");
         } else {
-          alert(result.error || "Login failed");
+          toast.error(result.error || 'Invalid email or password', { id: toastId });
         }
       } else {
         // Handle signup
         const response = await axiosInstance.post("/user/register", { email, password });
-        console.log("Signup success:", response.data);
-        alert("Signup successful! Please log in.");
+        toast.success('Account created successfully! Please log in.', { 
+          id: toastId,
+          duration: 3000
+        });
         setIsLogin(true);
+        setEmail('');
+        setPassword('');
       }
     } catch (err) {
-      // Log the specific error data from the server for better debugging
+      let errorMessage = isLogin ? 'Login failed' : 'Signup failed';
+      
       if (err.response) {
-        console.error("Validation Error:", err.response.data);
-        // You can display this error to the user
-        alert(`Error: ${JSON.stringify(err.response.data.errors || err.response.data)}`);
+        // Handle server validation errors
+        if (err.response.data?.errors) {
+          errorMessage = Object.values(err.response.data.errors).join('\n');
+        } else if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        } else {
+          errorMessage = JSON.stringify(err.response.data) || errorMessage;
+        }
+      } else if (err.request) {
+        errorMessage = 'No response from server. Please check your connection.';
       } else {
-        console.error("Axios Error:", err.message);
-        alert(`An error occurred: ${err.message}`);
+        errorMessage = err.message || errorMessage;
       }
+      
+      toast.error(errorMessage, { 
+        id: toastId,
+        duration: 5000,
+        style: {
+          maxWidth: '500px',
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-line'
+        }
+      });
     }
   }
 
