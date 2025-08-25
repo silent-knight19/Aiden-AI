@@ -28,3 +28,13 @@ export const createProjectController = async (req, res) => {
 }
 };
 
+export const getProjects = async (req, res) => {
+  try {
+    const loggedInUser = await usermodel.findOne({ email: req.user.email });
+    const projects = await projectModel.find({ userID: loggedInUser._id });
+    res.status(200).json({ projects });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+

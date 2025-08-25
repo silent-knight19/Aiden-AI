@@ -25,4 +25,4 @@ export const authuser= async (req, res, next) => {
             error: 'Unauthorized'
         });
     }
-};   
+};    

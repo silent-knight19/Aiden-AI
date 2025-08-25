@@ -1,122 +1,119 @@
-import React, { useState, useContext } from "react";
-import { FiSend, FiUser, FiMessageSquare, FiSun, FiMoon } from "react-icons/fi";
-import "../src/App.css";
-import { useUser } from "../src/context/user.context.jsx";
- 
+import React, { useContext, useState, useEffect } from "react";
+import { UserContext } from "../src/context/user.context";
+import axios from "../src/config/axios";
+import { useNavigate } from "react-router-dom";
+
 const Home = () => {
-  const { user } = useUser();
-  const [darkMode, setDarkMode] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! How can I assist you today?", sender: "ai" },
-  ]);
-  const [inputValue, setInputValue] = useState("");
+  const { user } = useContext(UserContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectName, setProjectName] = useState(null);
+  const [projects, setProjects] = useState([]);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-  };
+  const navigate = useNavigate();
 
-  const handleSendMessage = (e) => {
+  async function createProject(e) {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    try {
+      const res = await axios.post("/create", { name: projectName });
+      console.log(res);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-    // Add user message
-    const newMessage = {
-      id: messages.length + 1,
-      text: inputValue,
-      sender: "user",
-    };
-
-    setMessages([...messages, newMessage]);
-    setInputValue("");
-
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      const aiResponse = {
-        id: messages.length + 2,
-        text: "I received your message. This is a simulated response.",
-        sender: "ai",
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
-  };
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const res = await axios.get("/projects"); // Note: You'll need to implement this endpoint in the backend
+        setProjects(res.data.projects);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchProjects();
+  }, []);
 
   return (
-    <div
-      className={`flex flex-col h-screen transition-colors duration-200 ${
-        darkMode ? "dark bg-gray-900 text-gray-100" : "bg-gray-50"
-      }`}
-    >
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm py-4 px-6 flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
-          Aiden AI
-        </h1>
+    <main className="p-4 bg-slate-100">
+      <div className="container flex flex-wrap gap-3">
         <button
-          onClick={toggleDarkMode}
-          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          aria-label="Toggle dark mode"
+          onClick={() => setIsModalOpen(true)}
+          className="new-project bg-blue-600 text-white p-4 rounded-md"
         >
-          {darkMode ? (
-            <FiSun className="text-yellow-300" />
-          ) : (
-            <FiMoon className="text-gray-600" />
-          )}
+          New Project
+          <i className="ri-link ml-2"></i>
         </button>
-      </header>
 
-      {/* Chat Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
-        {messages.map((message) => (
+        {projects.map((project) => (
           <div
-            key={message.id}
-            className={`flex ${
-              message.sender === "user" ? "justify-end" : "justify-start"
-            }`}
+            key={project._id}
+            onClick={() => {
+              navigate(`/project`, {
+                state: { project },
+              });
+            }}
+            className="project flex flex-col gap-2 cursor-pointer bg-slate-200 p-4 rounded-md min-w-52 hover:bg-slate-300"
           >
-            <div
-              className={`flex items-start max-w-3xl rounded-lg px-4 py-2 ${
-                message.sender === "user"
-                  ? "bg-blue-600 text-white rounded-br-none"
-                  : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-bl-none text-gray-800 dark:text-gray-200"
-              }`}
-            >
-              {message.sender === "ai" && (
-                <div className="mr-2 mt-1 text-blue-500 dark:text-blue-400">
-                  <FiMessageSquare size={18} />
-                </div>
-              )}
-              <p className="text-sm">{message.text}</p>
-              {message.sender === "user" && (
-                <div className="ml-2 mt-1 text-white">
-                  <FiUser size={18} />
-                </div>
-              )}
+            <h2 className="project-name font-semibold">{project.name}</h2>
+
+            <div className="project-info flex gap-2">
+              <p>
+                {" "}
+                <small>
+                  {" "}
+                  <i className="ri-user-line text-gray-500"></i> Collaborators
+                </small>{" "}
+                :
+              </p>
+              <span className="text-gray-500">{project.users.length}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-        <form onSubmit={handleSendMessage} className="flex items-center">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg transition-colors duration-200 flex items-center"
-          >
-            <FiSend className="mr-1" />
-            Send
-          </button>
-        </form>
-      </div>
-    </div>
+      {isModalOpen && (
+        <div className="overlay fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 ">
+          <div className="modal bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-semibold mb-3 text-blue-600">
+              Create New Project
+            </h2>
+            <form onSubmit={createProject}>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-1">
+                  Project Name
+                </label>
+                <input
+                  onChange={(e) => setProjectName(e.target.value)}
+                  value={projectName || ''}
+                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  placeholder="Enter project name"
+                  required
+                />
+              </div>
+              <div className="flex justify-between gap-2 mt-4">
+                <div className="flex justify-center items-center gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 ml-3 py-2 bg-red-600 text-white rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 ml-10 bg-blue-600 text-white rounded-md"
+                  >
+                    Create
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </main>
   );
 };
 
