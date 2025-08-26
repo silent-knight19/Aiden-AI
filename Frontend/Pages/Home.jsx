@@ -3,6 +3,7 @@ import { UserContext } from "../src/context/user.context";
 import axios from "../src/config/axios";
 import { useNavigate } from "react-router-dom";
 
+
 const Home = () => {
   const { user } = useContext(UserContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,7 +15,7 @@ const Home = () => {
   async function createProject(e) {
     e.preventDefault();
     try {
-      const res = await axios.post("/create", { name: projectName });
+      const res = await axios.post("/createProject", { name: projectName });
       console.log(res);
       setIsModalOpen(false);
     } catch (error) {
@@ -25,7 +26,7 @@ const Home = () => {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const res = await axios.get("/projects"); // Note: You'll need to implement this endpoint in the backend
+        const res = await axios.get("/getAllProjects"); // Note: You'll need to implement this endpoint in the backend
         setProjects(res.data.projects);
       } catch (err) {
         console.log(err);
