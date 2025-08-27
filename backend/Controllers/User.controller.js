@@ -65,7 +65,7 @@ export const loginUserController = async (req, res) => {
 
   try {
     // Find user by email and explicitly select the password field
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -113,22 +113,33 @@ export const profilecontroller = async (req, res) => {
   });
 };
 
-
 export const logoutUserController = async (req, res) => {
-    try {
-        const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+  try {
+    const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 
-      redisClient.set(token, "logout", "EX", 60 * 60 * 24);
-      res.clearCookie("token");
-      res.json({
-        success: true,
-        message: "User logged out successfully",
-      });
-    } catch (error) {
-      console.error("Logout error:", error);
-      res.status(500).json({
-        success: false,
-        error: "Server error during logout",
-      });
-    }
-  };
+    redisClient.set(token, "logout", "EX", 60 * 60 * 24);
+    res.clearCookie("token");
+    res.json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error during logout",
+    });
+  }
+};
+
+export const getAllUserController = async (req, res) => {
+  try {
+    const loggedInUser = await usermodel.findOne({ email: req.user.email });
+    const allUsers = await userServices.getAllUsers({
+      userId: loggedInUser._id,
+    });
+    return res.status(200).json({ success: true, data: allUsers });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
