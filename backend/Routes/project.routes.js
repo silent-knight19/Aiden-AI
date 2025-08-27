@@ -41,15 +41,7 @@ router.get('/get-project/:projectId',
     projectController.getProjectById
 );
 
-// Update file tree for a project
-router.put('/update-file-tree',
-    authMiddleware.authuser,
-    [
-        body('projectId').trim().isString().withMessage('Project ID is required'),
-        body('fileTree').isObject().withMessage('File tree is required')
-    ],
-    projectController.updateFileTree
-);
+// Update file tree for a project (temporarily disabled until implemented)
 
 // Get all users for the logged-in user
 

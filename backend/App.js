@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import connect from './DataBase/db.js';
 import userRoutes from './Routes/User.routes.js';
+import projectRoutes from './Routes/project.routes.js';
 import cors from 'cors'
 
 const app = express();
@@ -16,5 +17,6 @@ app.get('/', (req,res)=>{
 });
 
 app.use('/user', userRoutes);
+app.use('/projects', projectRoutes);
 connect();
 export default app;

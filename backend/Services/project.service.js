@@ -10,22 +10,19 @@ export const createProject = async ({
     if (!userId) {
         throw new Error('UserId is required')
     }
-
-    let project;
-    try {
-        project = await projectModel.create({
-            name,
-            users: [ userId ]
-        });
-    } catch (error) {
-        if (error.code === 11000) {
-            throw new Error('Project name already exists');
-        }
-        throw error;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId format')
     }
 
-    return project;
-
+    try {
+        const project = await projectModel.create({
+            name,
+            users: [userId]
+        });
+        return project;
+    } catch (error) {
+        throw new Error('Error creating project: ' + error.message);
+    }
 }
 
 
@@ -113,17 +110,5 @@ export const getProjectById = async ({ projectId }) => {
     if (!project) {
         throw new Error("Project not found");
     }
+    return project;
 }
-const updatedProject = await projectModel.findOneAndUpdate({
-    _id: projectId
-}, {
-    $addToSet: {
-        users: {
-            $each: users
-        }
-    }
-}, {
-    new: true
-})
-
-return updatedProject;

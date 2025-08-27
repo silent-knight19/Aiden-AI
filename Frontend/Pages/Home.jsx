@@ -3,11 +3,10 @@ import { UserContext } from "../src/context/user.context";
 import axios from "../src/config/axios";
 import { useNavigate } from "react-router-dom";
 
-
 const Home = () => {
   const { user } = useContext(UserContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [projectName, setProjectName] = useState(null);
+  const [projectName, setProjectName] = useState("");
   const [projects, setProjects] = useState([]);
 
   const navigate = useNavigate();
@@ -15,23 +14,38 @@ const Home = () => {
   async function createProject(e) {
     e.preventDefault();
     try {
-      const res = await axios.post("/createProject", { name: projectName });
-      console.log(res);
+      const res = await axios.post("/projects/create", { name: projectName });
+      // Append newly created project if returned, else refetch
+      const created = res?.data?.data;
+      if (created) {
+        setProjects((prev) => [created, ...prev]);
+      } else {
+        await fetchProjects();
+      }
+      setProjectName("");
       setIsModalOpen(false);
     } catch (error) {
       console.log(error);
     }
   }
 
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const res = await axios.get("/getAllProjects"); // Note: You'll need to implement this endpoint in the backend
-        setProjects(res.data.projects);
-      } catch (err) {
-        console.log(err);
+  async function fetchProjects() {
+    try {
+      const res = await axios.get("/projects/all");
+      if (res.data.success) {
+        setProjects(res.data.data || []);
+      } else {
+        console.error("Failed to fetch projects:", res.data.error);
+      }
+    } catch (err) {
+      console.error("Error fetching projects:", err.response?.data?.error || err.message);
+      if (err.response?.status === 401) {
+        navigate('/login');
       }
     }
+  }
+
+  useEffect(() => {
     fetchProjects();
   }, []);
 
@@ -67,7 +81,7 @@ const Home = () => {
                 </small>{" "}
                 :
               </p>
-              <span className="text-gray-500">{project.users.length}</span>
+              <span className="text-gray-500">{project?.users?.length ?? 0}</span>
             </div>
           </div>
         ))}
@@ -81,12 +95,10 @@ const Home = () => {
             </h2>
             <form onSubmit={createProject}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-1">
-                  Project Name
-                </label>
+                <label className="block text-gray-700 mb-1">Project Name</label>
                 <input
                   onChange={(e) => setProjectName(e.target.value)}
-                  value={projectName || ''}
+                  value={projectName || ""}
                   type="text"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                   placeholder="Enter project name"

@@ -1,7 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../config/axios';
 
 export const UserContext = createContext(null);
+
+localStorage.clear();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -14,48 +17,40 @@ export const UserProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          // Here you would typically validate the token with your backend
-          // and fetch user data
-          // const response = await fetch('/api/auth/me', {
-          //   headers: { 'Authorization': `Bearer ${token}` }
-          // });
-          // const userData = await response.json();
-          // setUser(userData);
+          const response = await axiosInstance.get('/user/profile');
+          const userData = response.data.user;
+          setUser(userData);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         localStorage.removeItem('token');
+        navigate('/login');
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   const login = async (email, password) => {
     try {
-      // Replace with your actual login API call
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password })
-      // });
-      // const data = await response.json();
+      const response = await axiosInstance.post('/user/login', {
+        email,
+        password
+      });
       
-      // Mock response for now
-      const data = {
-        user: { id: '1', email, name: 'Test User' },
-        token: 'mock-jwt-token'
-      };
+      const { token, user } = response.data;
       
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      navigate('/');
+      localStorage.setItem('token', token);
+      setUser(user);
       return { success: true };
     } catch (error) {
       console.error('Login failed:', error);
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error.response?.data?.message || error.message 
+      };
     }
   };
 

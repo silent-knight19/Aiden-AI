@@ -106,11 +106,29 @@ export const loginUserController = async (req, res) => {
 };
 
 export const profilecontroller = async (req, res) => {
-  console.log(req.user);
-  res.json({
-    success: true,
-    user: req.user,
-  });
+  try {
+    const user = await User.findOne({ email: req.user.email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found"
+      });
+    }
+    
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.json({
+      success: true,
+      user: userResponse
+    });
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error while fetching profile"
+    });
+  }
 };
 
 export const logoutUserController = async (req, res) => {
