@@ -4,8 +4,6 @@ import axiosInstance from '../config/axios';
 
 export const UserContext = createContext(null);
 
-localStorage.clear();
-
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +53,7 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.clear();
     setUser(null);
     navigate('/login');
   };

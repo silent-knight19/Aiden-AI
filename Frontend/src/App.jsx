@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import Login from "../Pages/Login";
 import Signup from "../Pages/Signup";
 import Home from "../Pages/Home";
-
+ 
 function App() {
   return (
     <>
@@ -39,7 +39,7 @@ function App() {
         }}
       />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>
