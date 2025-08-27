@@ -36,11 +36,8 @@ router.put('/add-user',
 );
 
 // Get project by ID
-router.get('/:projectId',
+router.get('/get-project/:projectId',
     authMiddleware.authuser,
-    [
-        param('projectId').trim().isString().withMessage('Project ID is required')
-    ],
     projectController.getProjectById
 );
 
@@ -53,5 +50,8 @@ router.put('/update-file-tree',
     ],
     projectController.updateFileTree
 );
+
+// Get all users for the logged-in user
+
 
 export default router;

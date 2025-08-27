@@ -61,3 +61,18 @@ export const addUserToProject = async (req, res) => {
     return res.status(400).json({ success: false, error: error.message });
   }
 };
+export const getProjectById = async (req, res) => {
+  const { projectId } = req.params;
+  if (!projectId) {
+    return res.status(400).json({ success: false, error: "Project ID is required" });
+  }
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(400).json({ success: false, error: "Invalid Project ID" });
+  }
+  try {
+  const project = await projectService.getProjectById({projectId});
+  return res.status(200).json({ success: true, data: project });
+  } catch (error) {
+    return res.status(400).json({ success: false, error: error.message });
+  }
+};
