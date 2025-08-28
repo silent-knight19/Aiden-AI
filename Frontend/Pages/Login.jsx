@@ -110,8 +110,7 @@ function Login() {
   return (
     <div
       className="flex items-center justify-center min-h-screen w-screen
-                    bg-gradient-to-br from-gray-900 via-gray-950 to-black
-                    text-gray-100 p-6 font-sans"
+                 bg-[#343541]"
     >
       <motion.div
         key={isLogin ? "login" : "signup"}
@@ -119,11 +118,11 @@ function Login() {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="w-full max-w-lg bg-gray-900/90 backdrop-blur-xl
-                   rounded-3xl shadow-2xl p-10 border border-gray-800"
+        className="w-full max-w-md bg-[#202123]
+                   rounded-xl p-8 border border-gray-600"
       >
         {/* Header with Icon */}
-        <div className="flex items-center justify-center mb-8 space-x-3">
+        <div className="flex items-center justify-center mb-8">
           <motion.div
             initial={{ scale: 0, rotate: 180 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -135,75 +134,85 @@ function Login() {
             }}
           >
             {isLogin ? (
-              <KeyRound size={50} className="text-blue-500" />
+              <KeyRound size={40} className="text-gray-300" />
             ) : (
-              <UserRoundPlus size={50} className="text-blue-500" />
+              <UserRoundPlus size={40} className="text-gray-300" />
             )}
           </motion.div>
-          <h1 className="text-5xl font-bold text-center text-white">
-            {isLogin ? "Login" : "Sign Up"}
+        </div>
+
+        {/* Form Title */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-100">
+            {isLogin ? "Welcome back" : "Create your account"}
           </h1>
+          <p className="text-gray-400 mt-2 text-sm">
+            {isLogin ? "Enter your credentials to access your account" : "Create an account to get started"}
+          </p>
         </div>
 
         {/* Unified Form */}
-        <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-8">
+        <motion.form onSubmit={handleSubmit} variants={containerVariants} className="space-y-5">
+          {/* Email Input */}
           <motion.div variants={itemVariants} className="relative">
             <Mail
-              className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
-              size={24}
+              className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
+              size={20}
             />
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
-              placeholder="Email"
-              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl
-                         text-lg text-white placeholder-gray-400
-                         focus:outline-none focus:ring-2 focus:ring-blue-500
-                         transition duration-150"
+              placeholder="Email address"
+              className="w-full pl-12 pr-4 py-3 bg-[#343541] rounded-lg
+                         text-gray-100 placeholder-gray-500
+                         focus:outline-none focus:ring-1 focus:ring-gray-500
+                         transition duration-150 border border-gray-600"
             />
           </motion.div>
+
+          {/* Password Input */}
           <motion.div variants={itemVariants} className="relative">
             <Lock
-              className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-500"
-              size={24}
+              className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
+              size={20}
             />
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="Password"
-              className="w-full pl-14 pr-5 py-4 bg-gray-800 rounded-xl
-                         text-lg text-white placeholder-gray-400
-                         focus:outline-none focus:ring-2 focus:ring-blue-500
-                         transition duration-150"
+              className="w-full pl-12 pr-4 py-3 bg-[#343541] rounded-lg
+                         text-gray-100 placeholder-gray-500
+                         focus:outline-none focus:ring-1 focus:ring-gray-500
+                         transition duration-150 border border-gray-600"
             />
           </motion.div>
+
+          {/* Submit Button */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             variants={itemVariants}
             type="submit"
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700
-                       text-lg text-white font-semibold rounded-xl
-                       transition duration-150 shadow-lg"
+            className="w-full py-3 bg-[#10a37f] hover:bg-[#0d8a6a]
+                       text-white font-medium rounded-lg
+                       transition duration-150"
           >
-            {isLogin ? "Sign In" : "Create Account"}
+            {isLogin ? "Continue" : "Create account"}
           </motion.button>
         </motion.form>
 
-        {/* Toggle Button */}
-        <div className="mt-8 text-center text-base">
+        {/* Toggle Link */}
+        <div className="mt-6 text-center text-sm">
           <p className="text-gray-400">
             {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={toggleView}
-              className="ml-2 font-bold text-blue-500 hover:text-blue-400 transition duration-150"
+              className="ml-1 font-medium text-[#10a37f] hover:text-[#0d8a6a] transition duration-150"
             >
-              {isLogin ? "Sign Up" : "Sign In"}
-            </motion.button>
+              {isLogin ? "Sign up" : "Log in"}
+            </button>
           </p>
         </div>
       </motion.div>
