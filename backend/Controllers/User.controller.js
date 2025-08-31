@@ -69,7 +69,7 @@ export const loginUserController = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: "Invalid email or password", // More generic for security
+        error: "Invalid email or password",
       });
     }
 
@@ -78,7 +78,7 @@ export const loginUserController = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        error: "Invalid email or password", // More generic for security
+        error: "Invalid email or password",
       });
     }
 
@@ -133,9 +133,17 @@ export const profilecontroller = async (req, res) => {
 
 export const logoutUserController = async (req, res) => {
   try {
-    const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
-    redisClient.set(token, "logout", "EX", 60 * 60 * 24);
+    if (token) {
+      try {
+        await redisClient.set(token, "logout", "EX", 60 * 60 * 24);
+      } catch (redisError) {
+        console.warn('Redis error in logout:', redisError);
+        // Continue with logout even if Redis is not available
+      }
+    }
+    
     res.clearCookie("token");
     res.json({
       success: true,
@@ -150,14 +158,21 @@ export const logoutUserController = async (req, res) => {
   }
 };
 
+
 export const getAllUserController = async (req, res) => {
   try {
-    const loggedInUser = await usermodel.findOne({ email: req.user.email });
-    const allUsers = await userServices.getAllUsers({
-      userId: loggedInUser._id,
+    
+    const allUsers = await User.find({});
+    
+    return res.status(200).json({ 
+      success: true, 
+      data: allUsers 
     });
-    return res.status(200).json({ success: true, data: allUsers });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ 
+      success: false, 
+      error: "Server error while fetching users" 
+    });
   }
 };

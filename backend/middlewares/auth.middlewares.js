@@ -11,12 +11,18 @@ export const authuser = async (req, res, next) => {
         }
 
         const token = authHeader.split(" ")[1];
-        const isBlacklisted = await redisClient.get(token);
-        if (isBlacklisted) {
-            return res.status(401).json({
-                success: false,
-                error: 'Token has been invalidated'
-            });
+        
+        try {
+            const isBlacklisted = await redisClient.get(token);
+            if (isBlacklisted) {
+                return res.status(401).json({
+                    success: false,
+                    error: 'Token has been invalidated'
+                });
+            }
+        } catch (redisError) {
+            console.warn('Redis error in auth middleware:', redisError);
+            // Continue with token validation even if Redis is not available
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

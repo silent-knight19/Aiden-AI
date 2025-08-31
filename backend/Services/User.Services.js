@@ -1,19 +1,30 @@
-import userModel from "../Models/User.model.js";
+import User from "../Models/User.model.js";
 
-export const CreateUser = async (email, password) => {
-  if (!email || !password) {
-    throw new Error("Email and password are required");
-  }
-  const hashPassword = await userModel.hashPassword(password);
-  const user = await userModel.create({ email, password: hashPassword });
-};
-
-export const getAllUsers = async ({userId}) => {
-    const users = await userModel.find({
-      _id: { $ne: userId }
-    });
+export const getAllUsers = async ({ userId }) => {
+  try {
+    // Exclude the logged-in user from the list or return all users
+    const users = await User.find({ _id: { $ne: userId } });
     return users;
+  } catch (error) {
+    throw new Error('Error fetching users');
+  }
 };
 
-export default {CreateUser, getAllUsers};
- 
+export const getUserById = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    return user;
+  } catch (error) {
+    throw new Error('Error fetching user by ID');
+  }
+};
+
+export const createUser = async (userData) => {
+  try {
+    const user = new User(userData);
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error('Error creating user');
+  }
+};

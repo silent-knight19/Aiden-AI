@@ -42,7 +42,7 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
 UserSchema.methods.generateAuthToken = function() {
     return jwt.sign(
         { userId: this._id, email: this.email },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET || 'fallback-secret-key',
         { expiresIn: '1h' }
     );
 };
@@ -50,4 +50,3 @@ UserSchema.methods.generateAuthToken = function() {
 const User = mongoose.model('User', UserSchema);
 
 export default User;
-

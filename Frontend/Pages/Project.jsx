@@ -23,40 +23,63 @@ const Project = () => {
     }
   ]);
 
+  // Keep your original toggle function for the panel
+  const toggleSidePanel = () => {
+    setIsSidePanelOpen(!isSidePanelOpen);
+  };
+
   useEffect(() => {
-    // Try to fetch users from API with error handling
-    axios
-      .get("/users")
-      .then((res) => {
-        // Adjust based on your API response structure
-        const userData = res.data.data || res.data;
-        setUsers(Array.isArray(userData) ? userData : []);
-      })
-      .catch((err) => {
-        console.log("Error fetching users:", err);
-        // Fallback data for development
-        setUsers([
-          { id: 1, name: "Alice Cooper", email: "alice@example.com" },
-          { id: 2, name: "Bob Smith", email: "bob@example.com" },
-          { id: 3, name: "Carol Johnson", email: "carol@example.com" },
-          { id: 4, name: "David Wilson", email: "david@example.com" },
-          { id: 5, name: "Eve Brown", email: "eve@example.com" }
-        ]);
-      });
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("/user/all");
+        const userData = response.data.data || response.data;
+        
+        console.log("API Response:", response.data);
+        console.log("Processed userData:", userData);
+        
+        if (Array.isArray(userData)) {
+          // Verify unique IDs
+          const ids = userData.map(u => u.id);
+          console.log("User IDs:", ids);
+          console.log("Duplicate IDs:", ids.filter((id, index) => ids.indexOf(id) !== index));
+          
+          setUsers(userData);
+        } else {
+          console.error("Unexpected API response format:", response.data);
+          setUsers(getFallbackUsers());
+        }
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setUsers(getFallbackUsers());
+      }
+    };
+
+    const getFallbackUsers = () => {
+      return [
+        { id: 1, name: "Alice Cooper", email: "alice@example.com" },
+        { id: 2, name: "Bob Smith", email: "bob@example.com" },
+        { id: 3, name: "Carol Johnson", email: "carol@example.com" },
+        { id: 4, name: "David Wilson", email: "david@example.com" },
+        { id: 5, name: "Eve Brown", email: "eve@example.com" }
+      ];
+    };
+
+    fetchUsers();
   }, []);
 
+  // Fixed user selection toggle function
   const toggleUserSelection = (userId) => {
-    setSelectedUsers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
+    setSelectedUsers(prev => {
+      if (prev.includes(userId)) {
+        return prev.filter(id => id !== userId);
+      } else {
+        return [...prev, userId];
+      }
+    });
   };
 
   const handleAddUsers = () => {
     console.log("Selected users:", selectedUsers);
-    // Here you would typically make an API call to add users
-    // For now, we'll just close the modal
     setIsModalOpen(false);
     setSelectedUsers([]);
   };
@@ -91,7 +114,6 @@ const Project = () => {
         }`}
         data-name="collaborators-side-panel"
       >
-        {/* Panel Header with Close Button */}
         <div
           className="panel-header p-5 border-b border-gray-700 flex justify-between items-center"
           data-name="collaborators-panel-header"
@@ -108,7 +130,6 @@ const Project = () => {
           </button>
         </div>
 
-        {/* Panel Content */}
         <div
           className="panel-content p-4 overflow-y-auto h-[calc(100%-4rem)] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
           data-name="collaborators-panel-content"
@@ -119,7 +140,7 @@ const Project = () => {
           >
             {users.map((user) => (
               <div
-                key={user.id}
+                key={`user-${user.id}`}
                 className="collaborator-item flex items-center gap-3 p-3 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-200"
                 data-name={`collaborator-item-${user.id}`}
               >
@@ -127,14 +148,14 @@ const Project = () => {
                   className="collaborator-avatar w-10 h-10 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center text-gray-300 font-semibold"
                   data-name={`collaborator-avatar-${user.id}`}
                 >
-                  {user.name.charAt(0)}
+                  {(user.name || user.email || "?").charAt(0).toUpperCase()}
                 </div>
                 <div
                   className="collaborator-info"
                   data-name={`collaborator-info-${user.id}`}
                 >
                   <h3 className="collaborator-name font-medium text-gray-200">
-                    {user.name}
+                    {user.name || user.email.split('@')[0]}
                   </h3>
                   <p className="collaborator-email text-sm text-gray-400">
                     {user.email}
@@ -153,7 +174,6 @@ const Project = () => {
         }`}
         data-name="chat-section"
       >
-        {/* Chat Header */}
         <header
           className="chat-header p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900"
           data-name="chat-header"
@@ -166,7 +186,7 @@ const Project = () => {
             <i className="ri-add-line text-xl text-gray-300">Add User</i>
           </button>
           <button
-            onClick={() => setIsSidePanelOpen(!isSidePanelOpen)}
+            onClick={toggleSidePanel}
             className="collaborators-button p-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
             data-name="toggle-collaborators-panel-button"
           >
@@ -174,7 +194,6 @@ const Project = () => {
           </button>
         </header>
 
-        {/* Conversation Area */}
         <div
           className="conversation-area flex-grow flex flex-col"
           data-name="conversation-area"
@@ -210,7 +229,6 @@ const Project = () => {
             ))}
           </div>
 
-          {/* Input Area */}
           <div
             className="input-area-container w-full p-4 bg-gray-900 border-t border-gray-700"
             data-name="input-area-container"
@@ -237,13 +255,11 @@ const Project = () => {
         </div>
       </section>
 
-      {/* Main Content Area */}
       <section
         className="main-content h-full w-full bg-gray-800 flex-grow"
         data-name="main-content-area"
       ></section>
 
-      {/* User Selection Modal */}
       {isModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
@@ -253,7 +269,6 @@ const Project = () => {
             className="bg-gray-900 rounded-lg w-full max-w-md max-h-[90vh] flex flex-col border border-gray-700"
             data-name="user-selection-modal"
           >
-            {/* Modal Header */}
             <div
               className="p-4 border-b border-gray-700 flex justify-between items-center"
               data-name="user-modal-header"
@@ -273,9 +288,7 @@ const Project = () => {
               </button>
             </div>
 
-            {/* Modal Content with scrollable user list */}
             <div className="flex-grow p-4" data-name="user-modal-content">
-              {/* Scrollable User List Container */}
               <div
                 className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2"
                 data-name="user-list-scroll-container"
@@ -286,7 +299,7 @@ const Project = () => {
                 >
                   {users.map((user) => (
                     <div
-                      key={user.id}
+                      key={`selectable-user-${user.id}`}
                       onClick={() => toggleUserSelection(user.id)}
                       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors duration-200 ${
                         selectedUsers.includes(user.id)
@@ -299,14 +312,14 @@ const Project = () => {
                         className="w-10 h-10 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center text-gray-300 font-semibold"
                         data-name={`user-avatar-${user.id}`}
                       >
-                        {user.name.charAt(0)}
+                        {(user.name || user.email || "?").charAt(0).toUpperCase()}
                       </div>
                       <div
                         className="flex-grow"
                         data-name={`user-info-${user.id}`}
                       >
                         <h3 className="font-medium text-gray-200 text-sm">
-                          {user.name}
+                          {user.name || user.email.split('@')[0]}
                         </h3>
                         <p className="text-xs text-gray-400">{user.email}</p>
                       </div>
@@ -327,7 +340,6 @@ const Project = () => {
                 </div>
               </div>
 
-              {/* Add Users Button - fixed at bottom of modal */}
               <div className="pt-4" data-name="add-users-button-container">
                 <button
                   onClick={handleAddUsers}

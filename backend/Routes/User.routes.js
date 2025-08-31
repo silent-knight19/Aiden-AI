@@ -31,7 +31,9 @@ router.post(
   registrationValidation,
   controller.createUserController
 );
+
 router.post("/login", loginValidation, controller.loginUserController);
+
 router.get(
   "/logout",
   authMiddleware.authuser,
@@ -40,7 +42,7 @@ router.get(
 
 router.get("/profile", authMiddleware.authuser, controller.profilecontroller);
 
-router.get("/all", authMiddleware.authuser, controller.getAllUserController);
-
+// Make /all endpoint public (remove auth middleware)
+router.get("/all", controller.getAllUserController);
 
 export default router;
