@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "../src/config/axios.js";
+import { toast } from "react-hot-toast";
 
 const Project = () => {
   
